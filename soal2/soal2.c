@@ -7,7 +7,7 @@
 #include <string.h>
 
 typedef struct stackNode_t {
-    char key[30], type[30], fullName[40];
+    char key[30], type[30], fullName[40], old[5];
     struct StackNode *next;
 } StackNode;
 
@@ -19,7 +19,7 @@ typedef struct stack_t {
 
 // stack function declaration
 void stack_init(Stack *stack);
-void stack_push(Stack *stack, char value[], char type[], char fullName[]);
+void stack_push(Stack *stack, char value[], char type[], char fullName[], char old[]);
 void stack_for_each(Stack *stack, int option);
 void stack_push_dir(Stack *stack, char value[]); 
 
@@ -60,7 +60,7 @@ int main() {
 void modified_mkdir() {
     pid_t child;
     char *buffer;
-    char type[100], fullName[100];
+    char type[100], fullName[100], value[100], temp[100], old[20];
 
     Stack myStack;
     stack_init(&myStack);
@@ -79,8 +79,21 @@ void modified_mkdir() {
         buffer = strtok(de->d_name, ";");
         strcpy(type, buffer);
         buffer = strtok(NULL, ";");
-        printf("nama file: %s type: %s fullName: %s\n", buffer, type, fullName);
-        stack_push(&myStack, buffer, type, fullName);
+        strcpy(value, buffer);
+        buffer = strtok(NULL, ";");
+        strcpy(temp, buffer);
+
+        for (int i = 0; i < 10; i++) {
+            if (temp[i] == '.' || temp[i] == NULL || temp[i] == '_'){
+                old[i] = '\0';
+                break;
+            }
+
+            old[i] = temp[i];
+        }
+        printf("%s \n", old);
+        // printf("nama file: %s type: %s fullName: %s\n", buffer, type, fullName);
+        stack_push(&myStack, value, type, fullName, old);
     }
 
     child = fork();
@@ -130,7 +143,7 @@ void create_dir(char name[]) {
     if (child == 0) {
         char path[100] = "./petshop/";
         strcat(path, name);
-        printf("directory created: %s\n", name);
+        // printf("directory created: %s\n", name);
         char *argv[] = {"mkdir", path, NULL};
         execv("/bin/mkdir", argv);
 
@@ -141,14 +154,21 @@ void create_dir(char name[]) {
     }
 }
 
-void move_file(char value[], char type[], char fullName[]) {
+void move_file(char value[], char type[], char fullName[], char old[]) {
     pid_t child;
+
 
     child = fork();
 
+    char filePath[100] = "petshop/";
     char origin[100] = "petshop/";
     char newPath[100] = "petshop/";
     char sep[5] = "/";
+    char bar[20] = "keterangan.txt";
+
+    strcat(filePath, type);
+    strcat(filePath, sep);
+    strcat(filePath, bar);
 
     strcat(origin, fullName);
 
@@ -156,7 +176,14 @@ void move_file(char value[], char type[], char fullName[]) {
     strcat(newPath, sep);
     strcat(newPath, value);
     strcat(newPath, ".jpg");
-    printf("origin: %s newPath %s\n", origin, newPath);
+    // printf("origin: %s newPath %s\n", origin, newPath);
+
+    FILE *openFile = fopen(filePath, "a");
+    if (openFile == NULL){
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
     if (child == 0) {
     
         char *argv[] = { "mv", origin, newPath, NULL };
@@ -164,7 +191,9 @@ void move_file(char value[], char type[], char fullName[]) {
         // exit(EXIT_SUCCESS);
     } else {
         while (wait(NULL) > 0);
-
+        
+        fprintf(openFile, "nama : %s\numur : %s tahun\n\n", value, old);
+        fclose(openFile);
     }
 }
 
@@ -179,7 +208,7 @@ void stack_for_each(Stack *stack, int option) {
         }
     } else if (option == 3) {
         while (temp) {
-            move_file(temp->key, temp->type, temp->fullName);
+            move_file(temp->key, temp->type, temp->fullName, temp->old);
             temp = temp->next;
         }
     }
@@ -208,7 +237,7 @@ void stack_push_dir(Stack *stack, char value[]) {
     stack->size++;
 }
 
-void stack_push(Stack *stack, char value[], char type[], char fullName[]) {
+void stack_push(Stack *stack, char value[], char type[], char fullName[], char old[]) {
     StackNode *newNode = (StackNode*) malloc(sizeof(StackNode));
     if (!newNode) return;
 
@@ -216,6 +245,7 @@ void stack_push(Stack *stack, char value[], char type[], char fullName[]) {
     strcpy(newNode->key, value);
     strcpy(newNode->type, type);
     strcpy(newNode->fullName, fullName);
+    strcpy(newNode->old, old);
     newNode->next = stack->top;
     stack->top = newNode;
     stack->size++;
