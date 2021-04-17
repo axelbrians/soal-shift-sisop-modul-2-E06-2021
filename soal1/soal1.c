@@ -67,18 +67,6 @@ void extract_file(pid_t childId){
 }
 
 void move_file(pid_t childId){
-  char *files[] ={
-    "*.jpeg", "*.jpg", "*.png", "../Pyoto", "/FOTO" , 
-    "*.mp3", "../Musyik", "/MUSIK", 
-    "*.mp4", "../Fylm", "/FILM"};
-
-  if (childId == 0){
-    chdir("FOTO");
-    char *argv[] = {"mv", "*.jpg", "*.jpeg", "*.png", "../Pyoto", NULL};
-    execv("/bin/mv", argv);
-    chdir("..");
-  }
-  
 }
 
 void remove_folder(pid_t childId){
@@ -124,7 +112,7 @@ int main() {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
 
-    //if(tm.tm_mon == 3 && tm.tm_mday == 9 && tm.tm_hour == 16 && tm.tm_min == 22 && tm.tm_sec == 0){
+    if(tm.tm_mon == 3 && tm.tm_mday == 9 && tm.tm_hour == 16 && tm.tm_min == 22 && tm.tm_sec == 0){
       //A
       create_folder(fork());
       //B
@@ -132,13 +120,11 @@ int main() {
       //C
       extract_file(fork());
       //D
-      //move_file(fork());
-    //}
+      move_file(fork());
+    }
 
     if(tm.tm_mon == 3 && tm.tm_mday == 9 && tm.tm_hour == 22 && tm.tm_min == 22 && tm.tm_sec == 0){
       remove_folder(fork());
     }
-
-    sleep(30);
   }
 }
