@@ -65,6 +65,7 @@ wget --no-check-certificate "https://drive.google.com/uc?id=ID-FILE&export=downl
 - contoh
 ```
 Wget --no-check-certificate "https://drive.google.com/uc?id=1ZG8nRBRPquhYXq_sISdsVcXx5VdEgi-J&export=download" -O Musik_for_Stevany.zip
+```
 
 #### Jawaban:
 
