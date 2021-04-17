@@ -11,14 +11,14 @@
 #include <wait.h>
 #include <time.h>
 
-void create_folder(pid_t childId){
-  if(childId == 0){
+void create_folder(pid_t child_id){
+  if(child_id == 0){
     char *argv[] = {"mkdir", "Pyoto", "Musyik", "Fylm", NULL};
     execv("/bin/mkdir", argv);
   }
 }
 
-void download_file(pid_t childId){
+void download_file(pid_t child_id){
   char *files[] ={
     "https://drive.google.com/uc?id=1FsrAzb9B5ixooGUs0dGiBr-rC7TS9wTD&export=download", "Foto_for_Stevany.zip", 
     "https://drive.google.com/uc?id=1ZG8nRBRPquhYXq_sISdsVcXx5VdEgi-J&export=download", "Musik_for_Stevany.zip", 
@@ -28,7 +28,7 @@ void download_file(pid_t childId){
   int status;
 
   for(int i = 0; i < 6; i += 2){
-    if (childId == 0){
+    if (child_id == 0){
       char *argv[] = {
         "wget", 
         "--no-check-certificate", 
@@ -40,11 +40,11 @@ void download_file(pid_t childId){
       execv("/bin/wget", argv);
     }
     while((wait(&status)) > 0);
-    childId = fork();
+    child_id = fork();
   }
 }
 
-void extract_file(pid_t childId){
+void extract_file(pid_t child_id){
   char *files[] ={
     "Foto_for_Stevany.zip", 
     "Musik_for_Stevany.zip", 
@@ -54,7 +54,7 @@ void extract_file(pid_t childId){
   int status;
   
   for(int i = 0; i < 3; i++){
-    if (childId == 0){
+    if (child_id == 0){
       char *argv[] = {
         "unzip", 
         files[i], 
@@ -62,14 +62,14 @@ void extract_file(pid_t childId){
       execv("/bin/unzip", argv);
     }
     while((wait(&status)) > 0);
-    childId = fork();
+    child_id = fork();
   }
 }
 
-void move_file(pid_t childId){
+void move_file(pid_t child_id){
 }
 
-void remove_folder(pid_t childId){
+void remove_folder(pid_t child_id){
   
 }
 
