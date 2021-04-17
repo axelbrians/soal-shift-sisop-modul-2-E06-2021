@@ -20,9 +20,7 @@ Kelompok E-06
 
 ### B.
 
-
 ### C.
-
 
 ### D.
 
@@ -31,9 +29,7 @@ Kelompok E-06
 ### F.
 
 ### Kesulitan
-- Kesulitan mencari refenrensi untuk menggunakan regex yang sesuai.
-- Kesulitan dalam memahami fungsi `cut`.
-- Pada soal E, kesulitan untuk menghitung ERROR dan INFO pada setiap usernya sebelum mengetahui regex yang sesuai.
+
 
 ## Soal 2
 
