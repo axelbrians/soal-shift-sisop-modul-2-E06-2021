@@ -120,11 +120,11 @@ int main() {
       //C
       extract_file(fork());
       //D
-      move_file(fork());
+      //move_file(fork());
     }
 
     if(tm.tm_mon == 3 && tm.tm_mday == 9 && tm.tm_hour == 22 && tm.tm_min == 22 && tm.tm_sec == 0){
-      remove_folder(fork());
+      //remove_folder(fork());
     }
   }
 }
