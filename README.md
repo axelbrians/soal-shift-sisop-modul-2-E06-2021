@@ -36,11 +36,11 @@ Kemudian Steven meminta bantuanmu yang memang sudah jago sisop untuk membantunya
 **Note:**
 - Ulang Tahun Stevany : 09 April Pukul 22.22 WIB
 - Semua poin dijalankan oleh 1 script di latar belakang, termasuk mendownload file zip-nya. Jadi cukup jalankan script 1x serta ubah time dan date untuk check hasilnya.
-```
+
 Preview :
 [https://drive.google.com/drive/folders/1NzRiPPoVlR_H8P51cxN4jaceeFQGk4un](https://drive.google.com/drive/folders/1NzRiPPoVlR_H8P51cxN4jaceeFQGk4un)
 *tontonnya 720p biar jelas.. ಠ‿ಠ
-```
+
 - Tidak boleh menggunakan fungsi system(), mkdir(), dan rename() (Yang di bahasa C) .... FORBIDDENNN!!
 - Tidak boleh pake cron !!!
 - Menggunakan fork dan exec.
