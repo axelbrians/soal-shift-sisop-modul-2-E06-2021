@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <wait.h>
 #include <time.h>
+#include <dirent.h> 
 
 void create_folder(pid_t child_id){
   if(child_id == 0){
@@ -67,10 +68,61 @@ void extract_file(pid_t child_id){
 }
 
 void move_file(pid_t child_id){
+  char *files[] ={
+    "/home/ikhlasul/Documents//Pyoto/", "/home/ikhlasul/Documents/FOTO", 
+    "/home/ikhlasul/Documents//Musyik/", "/home/ikhlasul/Documents/MUSIK", 
+    "/home/ikhlasul/Documents//Fylm/", "/home/ikhlasul/Documents/FILM"
+    };
+
+  int status;
+
+  DIR *d;
+  struct dirent *dir;
+  char file[50];
+  for(int i = 0; i < 6; i += 2){
+    d = opendir(files[i + 1]);
+    while ((dir = readdir (d))) {
+      strcpy(file,files[i + 1]);
+      if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0){
+        if (child_id == 0){
+          strcat(file,"/");
+          strcat(file,dir->d_name);
+          char *argv[] = {"mv",file, files[i], NULL};
+          execv("/bin/mv", argv);
+        }
+        while((wait(&status)) > 0);
+        child_id = fork();
+      }
+    }
+  }
 }
 
-void remove_folder(pid_t child_id){
+void zip_folder(pid_t child_id){
+  int status;
+  if(child_id == 0){
+    char *argv[] = {"zip", "-r", "Lopyu_Stevany.zip","Pyoto", "Musyik", "Fylm", NULL};
+    execv("/bin/zip", argv);
+  }
+  while((wait(&status)) > 0);
+}
+
+void remove_file(pid_t child_id){
+  char *files[] ={
+    "FOTO", "Pyoto", 
+    "MUSIK", "Musyik", 
+    "FILM", "Fylm"
+    };
   
+  int status;
+  
+  for(int i = 0; i < 6; i++){
+    if(child_id == 0){
+        char *argv[] = {"rm", "-r", files[i], NULL};
+        execv("/bin/rm", argv);
+    }
+    child_id = fork();
+    while((wait(&status)) > 0);
+  }
 }
 
 int main() {
@@ -97,7 +149,7 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
-  if ((chdir("/home/ikhlasul/Documents/Modul2/Soal1")) < 0) {
+  if ((chdir("/home/ikhlasul/Documents")) < 0) {
     exit(EXIT_FAILURE);
   }
 
@@ -120,11 +172,13 @@ int main() {
       //C
       extract_file(fork());
       //D
-      //move_file(fork());
+      move_file(fork());
     }
 
+    //F
     if(tm.tm_mon == 3 && tm.tm_mday == 9 && tm.tm_hour == 22 && tm.tm_min == 22 && tm.tm_sec == 0){
-      //remove_folder(fork());
+      zip_folder(fork());
+      remove_file(fork());
     }
   }
 }
