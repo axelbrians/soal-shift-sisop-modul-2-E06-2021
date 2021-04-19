@@ -69,9 +69,9 @@ void extract_file(pid_t child_id){
 
 void move_file(pid_t child_id){
   char *files[] ={
-    "/home/ikhlasul/Documents//Pyoto/", "/home/ikhlasul/Documents/FOTO", 
-    "/home/ikhlasul/Documents//Musyik/", "/home/ikhlasul/Documents/MUSIK", 
-    "/home/ikhlasul/Documents//Fylm/", "/home/ikhlasul/Documents/FILM"
+    "/home/ikhlasul/Documents//Pyoto", "/home/ikhlasul/Documents/FOTO", 
+    "/home/ikhlasul/Documents//Musyik", "/home/ikhlasul/Documents/MUSIK", 
+    "/home/ikhlasul/Documents//Fylm", "/home/ikhlasul/Documents/FILM"
     };
 
   int status;
@@ -94,6 +94,7 @@ void move_file(pid_t child_id){
         child_id = fork();
       }
     }
+    closedir(d);
   }
 }
 
