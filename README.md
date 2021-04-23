@@ -80,6 +80,71 @@ Wget --no-check-certificate "https://drive.google.com/uc?id=1ZG8nRBRPquhYXq_sISd
 ### Kesulitan
 
 
-## Soal 2
+# Soal 2
+## Info
+* Dikerjakan oleh 05111940000137 - Axel Briano Suherik.
+* Tidak boleh menggunakan: `system()`, *shell script*, `mkdir()`, dan `rename`.
+* Menggunakan `fork` dan `exec`.
+
+## Subsoal a
+### Penjelasan soal
+1. Diminta untuk meng-unzip suatu file zip ke ./petshop
+2. Hanya file dengan extensi .jpg, file/folder lainnya dihapus saja.
+
+### Penyelesaian
+1. Karena zip dikasih dari soal, maka langsung menjalankan perintah unzip.
+2. Dengan command ini `unzip pets.zip *.jpg -d ./petshop` maka perintah no 1 dan 2 selesai.
+
+## Subsoal b
+### Penjelasan soal
+1. Dapatkan jenis hewan pada file yang telah di unzip
+2. Dari tiap jenis hewan, buatkan folder dengan nama sesuai jenisnya.
+
+### Penyelesaian
+1. Untuk subsoal ini saya menggunakan stack untuk menyimpan informasi jenis hewan yang ada.
+2. Agar nama yang disimpan unique saya membuat fungsi insert untuk melakukan cek kalau data yang baru dimasukkan itu belum ada pada stack.
+3. Jenis hewan didapat menggunakan method `strtok(<nama file>, ";");` 
+4. Jika sudah di list semua ke dalam stack, maka hanya perlu traversal seluruh elemen stack dan untuk tiap node saya memanggil fungsi buatan sendiri yang isinya membuat folder sesuai parameter yang di passing. Fungsi ini juga otomatis memblock jalannya program artinya tidak dilanjutkan ke tahap berikutnya sebelum selesai membuat folder.
+
+## Subsoal c
+### Penjelasan soal
+1. Memindahkan tiap file foto ke folder sesuai dengan jenisnya masing - masing.
+2. Rename nama file foto sesuai dengan perintah.
+
+### Penyelesaian
+1. Digunakan stack untuk menyimpan berbagai data yang diperlukan tiap fotonya.
+2. Diantaranya adalah nama foto utuh, nama hasil rename, jenis hewan foto tersebut, serta umur yang nanti dibutuhkan pada subsoal e.
+3. Melakukan scan ulang terhadap semua foto pada dir `./petshop`
+4. Manfaatkan `strtok()` untuk mendapatkan data yang diekstrak dari nama asli fotonya.
+5. Traversal stack dan untuk tiap node memanggil command saya membuat fungsi sendiri yaitu `move_file()`, fungsi ini menkonstruksi path yang sesuai sekaligus melakukan write pada file `keterangan.txt` untuk **subsoal e**.
+6. Pada akhir `move_file()` ada `execv(mv)` untuk memindahkan foto ke folder yang sesuai.
+
+## Subsoal d
+### Penjelasan soal
+1. Dapatkan nama dan jenis hewan jika pada suatu foto terdapat dua hewan sekaligus.
+2. Pindahkan hewan kedua pada folder yang sesuai
+3. Rename nama foto sesuai nama hewan.
+
+### Penyelesaian
+1. Sama seperti **subsoal c**, di sini digunakan stack untuk menyimpan macam - macam informasi.
+2. Hanya saja digunakan `execv(cp)` karena tidak ingin hewan pertamanya hilang.
+
+## Subsoal e
+### Penjelasan
+1. Membuat file `keterangan.txt` pada setiap folder jenis hewan.
+2. Isi file `keterangan.txt` dengan nama dan umur hewan pada folder tersebut.
+   Format:
+   > nama : joni  
+   > umur : 3 tahun
+   >
+   > nama : miko  
+   > umur: 2 tahun
+   >
+
+### Penyelesaian
+1. Sudah dilakukan saat melakukan `mv` atau `cp` pada subsoal sebelumnya.
+
+### Kesulitan
+Yang paling merepotkan bagi saya di nomer 2 ini adalah saat memproses suatu file ganda, ex `dog;baro;1_cat;joni;2.jpg` lumayan memakan waktu saat berusaha memproses string namanya ke masing-masing stack. Kemudian memikirkan metode agar dapat memindahkan file ke folder jenis hewan masing - masing juga lumayan, pada akhirnya saya memilih pendekatan dengan stack. Menyimpan semua informasi yang diperlukan, setelah itu menjalankan command yang sesuai untuk tiap node pada stack.
 
 ## Soal 3
