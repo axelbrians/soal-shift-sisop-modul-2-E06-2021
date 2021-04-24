@@ -11,6 +11,7 @@
 #include <wait.h>
 #include <time.h>
 #include <dirent.h> 
+#include <limits.h>
 
 void create_folder(pid_t child_id){
   if(child_id == 0){
@@ -68,26 +69,33 @@ void extract_file(pid_t child_id){
 }
 
 void move_file(pid_t child_id){
+  char cwd[PATH_MAX];
+  getcwd(cwd, PATH_MAX);
+
   char *files[] ={
-    "/home/ikhlasul/Documents//Pyoto", "/home/ikhlasul/Documents/FOTO", 
-    "/home/ikhlasul/Documents//Musyik", "/home/ikhlasul/Documents/MUSIK", 
-    "/home/ikhlasul/Documents//Fylm", "/home/ikhlasul/Documents/FILM"
+    "/Pyoto", "/FOTO", 
+    "/Musyik", "/MUSIK", 
+    "/Fylm", "/FILM"
     };
 
   int status;
 
   DIR *d;
   struct dirent *dir;
-  char file[50];
+  char file[PATH_MAX];
+  char dest[PATH_MAX];
   for(int i = 0; i < 6; i += 2){
-    d = opendir(files[i + 1]);
+    strcpy(file, cwd);
+    strcat(file, files[i + 1]);
+    strcpy(dest, cwd);
+    strcat(dest, files[i]);
+    d = opendir(file);
     while ((dir = readdir (d))) {
-      strcpy(file,files[i + 1]);
       if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0){
         if (child_id == 0){
           strcat(file,"/");
           strcat(file,dir->d_name);
-          char *argv[] = {"mv",file, files[i], NULL};
+          char *argv[] = {"mv", file, dest, NULL};
           execv("/bin/mv", argv);
         }
         while((wait(&status)) > 0);
@@ -127,18 +135,14 @@ void remove_file(pid_t child_id){
 }
 
 int main() {
-  pid_t pid, sid;        // Variabel untuk menyimpan PID
+  pid_t pid, sid;
 
-  pid = fork();     // Menyimpan PID dari Child Process
+  pid = fork();
 
-  /* Keluar saat fork gagal
-  * (nilai variabel pid < 0) */
   if (pid < 0) {
     exit(EXIT_FAILURE);
   }
 
-  /* Keluar saat fork berhasil
-  * (nilai variabel pid adalah PID dari child process) */
   if (pid > 0) {
     exit(EXIT_SUCCESS);
   }
@@ -150,7 +154,8 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
-  if ((chdir("/home/ikhlasul/Documents")) < 0) {
+  char cwd[PATH_MAX];
+  if ((chdir(getcwd(cwd, PATH_MAX))) < 0) {
     exit(EXIT_FAILURE);
   }
 
@@ -159,8 +164,6 @@ int main() {
   close(STDERR_FILENO);
 
   while (1) {
-    // Tulis program kalian di sini
-    
     //E
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
