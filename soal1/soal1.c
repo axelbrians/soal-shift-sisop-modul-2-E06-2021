@@ -83,16 +83,18 @@ void move_file(pid_t child_id){
   DIR *d;
   struct dirent *dir;
   char file[PATH_MAX];
+  char current[PATH_MAX];
   char dest[PATH_MAX];
   for(int i = 0; i < 6; i += 2){
-    strcpy(file, cwd);
-    strcat(file, files[i + 1]);
+    strcpy(current, cwd);
+    strcat(current, files[i + 1]);
     strcpy(dest, cwd);
     strcat(dest, files[i]);
-    d = opendir(file);
+    d = opendir(current);
     while ((dir = readdir (d))) {
       if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0){
         if (child_id == 0){
+          strcpy(file, current);
           strcat(file,"/");
           strcat(file,dir->d_name);
           char *argv[] = {"mv", file, dest, NULL};
