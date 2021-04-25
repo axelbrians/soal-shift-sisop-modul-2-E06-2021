@@ -66,19 +66,202 @@ Wget --no-check-certificate "https://drive.google.com/uc?id=1ZG8nRBRPquhYXq_sISd
 #### Jawaban:
 
 ### A.
+Membuat folder dengan nama folder-foldernya adalah Musyik untuk mp3, Fylm untuk mp4, dan Pyoto untuk jpg.
+```
+void create_folder(pid_t child_id){
+	if(child_id == 0){
+		char *argv[] = {"mkdir", "Pyoto", "Musyik", "Fylm", NULL};
+		execv("/bin/mkdir", argv);
+	}
+}
+```
+- `char *argv[]`, variabel ini nantinya berguna sebagai nama folder yang akan dibuat saat fungsi `exec` menjalankan program baru.
+- `execv("/bin/mkdir", argv);`, exec ini akan menjalankan program untuk membuat folder baru sesuai dengan isi variabel `char *argv[]`.
 
 ### B.
+Mendownload dari link yang telah disediakan disoal.
+```
+void download_file(pid_t child_id){
+	char *files[] ={
+		"https://drive.google.com/uc?id=1FsrAzb9B5ixooGUs0dGiBr-rC7TS9wTD&export=download", "Foto_for_Stevany.zip",
+		"https://drive.google.com/uc?id=1ZG8nRBRPquhYXq_sISdsVcXx5VdEgi-J&export=download", "Musik_for_Stevany.zip",
+		"https://drive.google.com/uc?id=1ktjGgDkL0nNpY-vT7rT7O6ZI47Ke9xcp&export=download", "Film_for_Stevany.zip"
+		};
+	
+	int status;
+
+	for(int i = 0; i < 6; i += 2){
+		if (child_id == 0){
+			char *argv[] = {
+				"wget",
+				"--no-check-certificate",
+				files[i],
+				"-O",
+				files[i + 1],
+				"-q",
+				NULL};
+			execv("/bin/wget", argv);
+		}
+		while((wait(&status)) > 0);
+		child_id = fork();
+	}
+}
+```
+- `char *files[]`, variabel ini menyimpan link drive yang akan didownload dan nama file yang telah didownload.
+- `char *argv[]`, variabel ini berguna sebagai perintah saat fungsi `exec` menjalankan program baru.
+- `execv("/bin/wget", argv);`, exec ini akan menjalankan program untuk memdownload dan menamai file download-an tersebut sesuai dengan isi variabel `char *argv[]`.
+- `while((wait(&status)) > 0);`, berguna untuk memastikan proses download telah selesai agar dapat memulai proses download lainnya.
+- `child_id = fork();`, berguna untuk mengatur ulang nilai child_id agar bisa digunakan lagi untuk proses download file selanjutnya.
 
 ### C.
+Meng-extract file zip yang telah didownload pada soal B.
+```
+void extract_file(pid_t child_id){
+	char *files[] ={
+		"Foto_for_Stevany.zip",
+		"Musik_for_Stevany.zip",
+		"Film_for_Stevany.zip"
+	};
+
+	int status;
+
+	for(int i = 0; i < 3; i++){
+		if (child_id == 0){
+			char *argv[] = {
+				"unzip", 
+				files[i],
+				NULL};
+			execv("/bin/unzip", argv);
+		}
+		while((wait(&status)) > 0);
+		child_id = fork();
+	}
+}
+```
+- `char *files[]`, variabel ini akan menunjukkan file .zip mana yang semestinya di unzip sesuai dengan char yang tersimpan di variabel ini.
+- `char *argv[]`, variabel ini berguna sebagai perintah saat fungsi `exec` menjalankan program baru.
+- `execv("/bin/unzip", argv);`, exec ini akan menjalankan program untuk melakukan proses unzip pada .zip sesuai dengan isi  `char *argv[]`.
+- `while((wait(&status)) > 0);`, berguna untuk memastikan proses unzip telah selesai agar dapat memulai proses unzip lainnya.
+- `child_id = fork();`, berguna untuk mengatur ulang nilai child_id agar bisa digunakan lagi untuk proses selanjutnya.
 
 ### D.
+Memindahkan isi file yang telah di unzip pada proses C ke dalam folder yang telah dibuat pada proses A.
+```
+void move_file(pid_t child_id){
+	char cwd[PATH_MAX];
+	getcwd(cwd, PATH_MAX);
+	
+	char *files[] ={
+		"/Pyoto", "/FOTO",
+		"/Musyik", "/MUSIK",
+		"/Fylm", "/FILM"
+	};
+
+	int status;
+
+	DIR *d;
+	struct dirent *dir;
+	char file[PATH_MAX];
+	char dest[PATH_MAX];
+	for(int i = 0; i < 6; i += 2){
+		strcpy(file, cwd);
+		strcat(file, files[i + 1]);
+		strcpy(dest, cwd);
+		strcat(dest, files[i]);
+		d = opendir(file);
+		while ((dir = readdir (d))) {
+			if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0){
+				if (child_id == 0){
+					strcat(file,"/");
+					strcat(file,dir->d_name);
+					char *argv[] = {"mv", file, dest, NULL};
+					execv("/bin/mv", argv);
+				}
+				while((wait(&status)) > 0);
+				child_id = fork();
+			}
+		}
+		closedir(d);
+	}
+}
+```
+- `char cwd[PATH_MAX];	getcwd(cwd, PATH_MAX);`, variabel cwd akan menyimpan *path* dari direktori (folder) yang digunakan saat ini.
+- `char *files[]`, variabel ini berguna untuk mengarahkan *path* dari direktori (folder) ke direktori yang diinginkan.
+- `char file[PATH_MAX];`, variabel ini berguna untuk menunjuk file mana yang akan dipindahkan. `strcpy(file, cwd);`, variabel ini akan mengcopy isi dari variabel cwd, `strcat(file, files[i + 1]);`, lalu variabel ini mengambungkan isinya dengan isi dari files yang ditentukan, `strcat(file,"/");`, menambahkan /, `strcat(file,dir->d_name);`, dan terakhir mengabungkannya dengan filenya akan dipindahkan.
+- `char dest[PATH_MAX];`, variabel ini berguna untuk menunjukan kemana file tersebut akan dipindahkan. `strcpy(dest, cwd);`, variabel ini akan mengcopy isi dari variabel cwd, `strcat(dest, files[i]);`, lalu variabel ini mengambungkan isinya dengan isi dari files yang ditentukan.
+- `if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0)`, berguna apabila ditemukan file `.` dan `..`, maka file tersebut tidak akan dipindahkan.
+- `char *argv[]`, variabel ini berguna sebagai perintah saat fungsi `exec` menjalankan program baru.
+- `execv("/bin/mv", argv);`, exec ini akan menjalankan program untuk memindahkan file sesuai dengan isi  `char *argv[]`.
+- `while((wait(&status)) > 0);`, berguna untuk memastikan proses unzip telah selesai agar dapat memulai proses unzip lainnya.
+- `child_id = fork();`, berguna untuk mengatur ulang nilai child_id agar bisa digunakan lagi untuk proses selanjutnya.
 
 ### E.
+Semua proses A, B, C, dan D otomatis berjalan pada bulan April tanggal 9 jam 16:22:00. 
+```
+if(tm.tm_mon == 3 && tm.tm_mday == 9 && tm.tm_hour == 16 && tm.tm_min == 22 && tm.tm_sec == 0){
+	//A
+	create_folder(fork());
+	//B
+	download_file(fork());
+	//C
+	extract_file(fork());
+	//D
+	move_file(fork());
+}
+```
+- `if(tm.tm_mon == 3 && tm.tm_mday == 9 && tm.tm_hour == 16 && tm.tm_min == 22 && tm.tm_sec == 0)`, menggunakan fungsi waktu yang tersedia pada library time.h, dimana apabila waktu yang telah ditentukan semuanya sama, maka fungsi void pada masing proses akan berjalan.
 
 ### F.
+Pada bulan April tanggal 9 jam 22:22:00 akan menjalankan proses lainnya.
+```
+if(tm.tm_mon == 3 && tm.tm_mday == 9 && tm.tm_hour == 22 && tm.tm_min == 22 && tm.tm_sec == 0){
+	zip_folder(fork());
+	remove_file(fork());
+}
+```
+menggunakan fungsi waktu yang tersedia pada library time.h, dimana apabila waktu yang telah ditentukan semuanya sama, maka fungsi void pada masing proses akan berjalan.
+Proses yang akan berjalan ada 2 buah, pertama ialah proses pen-zip-an semua folder yang dibuat pada proses A.
+```
+void zip_folder(pid_t child_id){
+	int status;
+	if(child_id == 0){
+		char *argv[] = {"zip", "-r", "Lopyu_Stevany.zip","Pyoto", "Musyik", "Fylm", NULL};
+		execv("/bin/zip", argv);
+	}
+	while((wait(&status)) > 0);
+}
+```
+- `char *argv[]`, variabel ini berguna sebagai perintah saat fungsi `exec` menjalankan program baru.
+- `execv("/bin/zip", argv);`, exec ini akan menjalankan program untuk penge-zip-an file sesuai dengan isi variabel `char *argv[]`.
+- `while((wait(&status)) > 0);`, berguna untuk memastikan proses zip telah selesai agar dapat memulai proses selanjutnya.
+Proses kedua ialah mengahapus semua folder yang ada dan menyisakan file dengan extensions .zip
+```
+void remove_file(pid_t child_id){
+	char *files[] ={
+		"FOTO", "Pyoto",
+		"MUSIK", "Musyik",
+		"FILM", "Fylm"
+	};
+
+	int status;
+
+	for(int i = 0; i < 6; i++){
+		if(child_id == 0){
+			char *argv[] = {"rm", "-r", files[i], NULL};
+			execv("/bin/rm", argv);
+		}
+		child_id = fork();
+		while((wait(&status)) > 0);
+	}
+}
+```
+- `char *files[]`, variabel ini menyimpan nama folder yang akan dihapus.
+- `char *argv[]`, variabel ini berguna sebagai perintah saat fungsi `exec` menjalankan program baru.
+- `execv("/bin/rm", argv);`, exec ini akan menjalankan program untuk menghapus isi variabel `char *argv[]`.
+- `while((wait(&status)) > 0);`, berguna untuk memastikan proses telah selesai agar dapat segera memulai proses selanjutnya.
+- `child_id = fork();`, berguna untuk mengatur ulang nilai child_id agar bisa digunakan untuk proses selanjutnya.
 
 ### Kesulitan
-
 
 # Soal 2
 ## Info
