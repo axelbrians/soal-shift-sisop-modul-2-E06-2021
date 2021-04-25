@@ -340,3 +340,165 @@ https://user-images.githubusercontent.com/79897417/115990016-4779e300-a5eb-11eb-
 Yang paling merepotkan bagi saya di nomer 2 ini adalah saat memproses suatu file ganda, ex `dog;baro;1_cat;joni;2.jpg` lumayan memakan waktu saat berusaha memproses string namanya ke masing-masing stack. Kemudian memikirkan metode agar dapat memindahkan file ke folder jenis hewan masing - masing juga lumayan, pada akhirnya saya memilih pendekatan dengan stack. Menyimpan semua informasi yang diperlukan, setelah itu menjalankan command yang sesuai untuk tiap node pada stack.
 
 ## Soal 3
+Ranora adalah mahasiswa Teknik Informatika yang saat ini sedang menjalani magang di perusahan ternama yang bernama “FakeKos Corp.”, perusahaan yang bergerak dibidang keamanan data. Karena Ranora masih magang, maka beban tugasnya tidak sebesar beban tugas pekerja tetap perusahaan. Di hari pertama Ranora bekerja, pembimbing magang Ranora memberi tugas pertamanya untuk membuat sebuah program.
+
+(a) Ranora harus membuat sebuah program C yang dimana setiap 40 detik membuat sebuah direktori dengan nama sesuai timestamp [YYYY-mm-dd_HH:ii:ss].
+
+(b) Setiap direktori yang sudah dibuat diisi dengan 10 gambar yang didownload dari https://picsum.photos/, dimana setiap gambar akan didownload setiap 5 detik. Setiap gambar yang didownload akan diberi nama dengan format timestamp [YYYY-mm-dd_HH:ii:ss] dan gambar tersebut berbentuk persegi dengan ukuran (n%1000) + 50 pixel dimana n adalah detik Epoch Unix.
+
+(c) Setelah direktori telah terisi dengan 10 gambar, program tersebut akan membuat sebuah file “status.txt”, dimana didalamnya berisi pesan “Download Success” yang terenkripsi dengan teknik Caesar Cipher dan dengan shift 5. Caesar Cipher adalah Teknik enkripsi sederhana yang dimana dapat melakukan enkripsi string sesuai dengan shift/key yang kita tentukan. Misal huruf “A” akan dienkripsi dengan shift 4 maka akan menjadi “E”. Karena Ranora orangnya perfeksionis dan rapi, dia ingin setelah file tersebut dibuat, direktori akan di zip dan direktori akan didelete, sehingga menyisakan hanya file zip saja.
+
+(d) Untuk mempermudah pengendalian program, pembimbing magang Ranora ingin program tersebut akan men-generate sebuah program “Killer” yang executable, dimana program tersebut akan menterminasi semua proses program yang sedang berjalan dan akan menghapus dirinya sendiri setelah program dijalankan. Karena Ranora menyukai sesuatu hal yang baru, maka Ranora memiliki ide untuk program “Killer” yang dibuat nantinya harus merupakan program bash.
+
+(e) Pembimbing magang Ranora juga ingin nantinya program utama yang dibuat Ranora dapat dijalankan di dalam dua mode. Untuk mengaktifkan mode pertama, program harus dijalankan dsdengan argumen -z, dan Ketika dijalankan dalam mode pertama, program utama akan langsung menghentikan semua operasinya Ketika program Killer dijalankan. Sedangkan untuk mengaktifkan mode kedua, program harus dijalankan dengan argumen -x, dan Ketika dijalankan dalam mode kedua, program utama akan berhenti namun membiarkan proses di setiap direktori yang masih berjalan hingga selesai (Direktori yang sudah dibuat akan mendownload gambar sampai selesai dan membuat file txt, lalu zip dan delete direktori).
+
+Ranora meminta bantuanmu untuk membantunya dalam membuat program tersebut. Karena kamu anak baik dan rajin menabung, bantulah Ranora dalam membuat program tersebut!
+
+**Note:**
+- Tidak boleh menggunakan system() dan mkdir()
+- Program utama merupakan SEBUAH PROGRAM C
+- Wajib memuat algoritma Caesar Cipher pada program utama yang dibuat
+
+#### Jawaban:
+
+### A.
+- Timestamp bisa didapatkan dengan memanfaatkan fungsi `strftime` dan juga `localtime`.
+```
+void getTime(char *string) {
+	time_t t;
+	char timestamp[50];
+	t=time(NULL);
+	strftime(timestamp, sizeof(timestamp), "%Y-%m-%d_%H:%M:%S", localtime(&t));
+	strcpy(string, timestamp);
+	return;
+}
+```
+- Dikarenakan tidak boleh memanggil fungsi `mkdir` secara langsung, maka solusinya adalah dengan menggunakan fungsi `execv` untuk memanggil fungsi `mkdir` tersebut.
+- Dengan memanfaatkan fungsi `while(1)` dan `sleep(40)` maka directory dibuat setiap 40 detik sekali secara terus menerus.
+```
+while(1){
+	char pdir[200];
+	getTime(pdir);
+	char *argv[] = {"mkdir", "-p", pdir, NULL};
+	execv("/bin/mkdir", argv);
+	sleep(40);
+}
+```
+
+### B.
+```
+char nama[300],img[300],url[300];
+pid_t cid3;
+int status3;
+for(int i=1;i<=10;i++){
+	getTime(img);
+	sprintf(nama, "%s/%s.jpg", pdir, img);
+
+	long long sizeimg = time(NULL) % 1000 + 50;
+	snprintf(url, sizeof(url),"https://picsum.photos/%lld",sizeimg);
+
+	cid3 = fork();
+	if(cid3 == 0){
+		char *argv[] = {"wget", "-q", "-O", nama, url, NULL};
+		execv("/usr/bin/wget", argv);
+	}
+	sleep(5);
+}
+```
+- Fungsi `sprintf(nama, "%s/%s.jpg", pdir, img)` digunakan untuk penamaan file gambar yang akan di unduh sesuai dengan timestamp.
+- `snprintf(url, sizeof(url),"https://picsum.photos/%lld",time(NULL) % 1000 + 50)` digunakan untuk membentuk gambar menjadi sebuah persegi dari epoch time unix sesuai ketentuan.
+- Dengan membuat child process `cid3`, dapat dilanjutkan dengan fungsi `execv` untuk memanggil `wget` syscall
+
+### C.
+- Fungsi `Cipher` dapat digunakan untuk shift tiap karakter suatu pesan sebanyak `key`.
+```
+void Cipher(char *msg, int key) {
+	char ch;
+	for(int i=0;msg[i]!='\0';++i){
+		ch = msg[i];
+
+		if(ch >= 'a' && ch <= 'z'){
+			ch += key;
+			if(ch > 'z') ch = ch - 'z' + 'a' - 1;
+			msg[i] = ch;
+		}else if(ch >= 'A' && ch <= 'Z'){
+			ch += key;
+			if(ch > 'Z') ch = ch - 'Z' + 'A' - 1;
+			msg[i] = ch;
+		}
+	}
+}
+```
+- Setelah proses unduh selesai pada subsoal b, dapat dilanjutkan dengan mengenkripsi pesan "Download Success" lalu menyimpannya pada file `status.txt`
+```
+char statustxt[100];
+char statusmsg[] = "Download Success";
+Cipher(statusmsg, 5);
+
+strcpy(statustxt, pdir);
+strcat(statustxt, "/status.txt");
+
+FILE *statusFile = fopen(statustxt, "w");
+fputs(statusmsg, statusFile);
+fclose(statusFile);
+```
+- Tahap selanjutnya adalah memanggil fungsi `zip` untuk mengompress folder yang sudah dibuat dan dilanjutkan dengan `rm` untuk menghapus folder yang sudah dikompress.
+```
+pid_t cid4;
+int status4;
+cid4 = fork();
+
+if(cid4 == 0){
+	char outputZip[300];
+	sprintf(outputZip, "%s.zip", pdir);
+
+	char *argv[] = {"zip", "-r", outputZip, pdir, NULL};
+	execv("/usr/bin/zip", argv);
+}else{
+	while ((wait(&status4)) > 0);
+	char *argv[] = {"rm", "-r", pdir, NULL};
+	execv("/usr/bin/rm", argv);
+}
+```
+
+### D. E.
+- Sebuah file bernama `Killer` dibuat dengan isian shell command.
+- Untuk argumen `-z`, maka command yang digunakan adalah `killList=$(echo $(pidof ./soal3))` yang berfungsi untuk melakukan cek semua file yang memiliki pid `soal3`, lalu dilanjutkan dengan command "kill -9 $killList\n untuk melakukan kill pada proses child yang terdapat pada variabel killlist.
+- Untuk argumen `-x`, maka command yang digunakan adalah `kill %d\n` yang berfungsi untuk melakukan kill pada pid parent saja.
+```
+void Killer(char mode){
+	FILE *killer;
+	killer = fopen("Killer", "w");
+	if(mode == 'z') fprintf(killer,"#!/bin/bash\nkillList=$(echo $(pidof ./soal3))\nkill -9 $killList\nrm Killer");
+	else if(mode == 'x') fprintf(killer,"#!/bin/bash\nkill %d\nrm Killer",getpid());
+	fclose(killer);
+
+	pid_t child_chmod;
+	child_chmod = fork();
+
+	if(child_chmod == 0){
+		char *argv[] = {"chmod", "+x", "Killer", NULL};
+		execv("/usr/bin/chmod", argv);
+	}
+	return;
+}
+
+```
+- Setelah proses unduh selesai pada subsoal b, dapat dilanjutkan dengan mengenkripsi pesan "Download Success" lalu menyimpannya pada file `status.txt`
+```
+char statustxt[100];
+char statusmsg[] = "Download Success";
+Cipher(statusmsg, 5);
+
+strcpy(statustxt, pdir);
+strcat(statustxt, "/status.txt");
+
+FILE *statusFile = fopen(statustxt, "w");
+fputs(statusmsg, statusFile);
+fclose(statusFile);
+```
+
+### Kesulitan
+- Pada soal 2.B, saat mengunduh sebuah gambar dari suatu url, lalu menyimpan dengan ukuran sesuai dengan epoch time dan berbentuk persegi, lalu disimpan lagi dengan nama timestamp ketika mendownload.
+
+### Output
