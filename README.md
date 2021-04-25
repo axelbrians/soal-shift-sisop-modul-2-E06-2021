@@ -162,16 +162,18 @@ void move_file(pid_t child_id){
 	DIR *d;
 	struct dirent *dir;
 	char file[PATH_MAX];
+	char current[PATH_MAX];
 	char dest[PATH_MAX];
 	for(int i = 0; i < 6; i += 2){
-		strcpy(file, cwd);
-		strcat(file, files[i + 1]);
+		strcpy(current, cwd);
+		strcat(current, files[i + 1]);
 		strcpy(dest, cwd);
 		strcat(dest, files[i]);
-		d = opendir(file);
+		d = opendir(current);
 		while ((dir = readdir (d))) {
 			if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0){
 				if (child_id == 0){
+					strcpy(file, current);
 					strcat(file,"/");
 					strcat(file,dir->d_name);
 					char *argv[] = {"mv", file, dest, NULL};
@@ -187,7 +189,8 @@ void move_file(pid_t child_id){
 ```
 - `char cwd[PATH_MAX];	getcwd(cwd, PATH_MAX);`, variabel cwd akan menyimpan *path* dari direktori (folder) yang digunakan saat ini.
 - `char *files[]`, variabel ini berguna untuk mengarahkan *path* dari direktori (folder) ke direktori yang diinginkan.
-- `char file[PATH_MAX];`, variabel ini berguna untuk menunjuk file mana yang akan dipindahkan. `strcpy(file, cwd);`, variabel ini akan mengcopy isi dari variabel cwd, `strcat(file, files[i + 1]);`, lalu variabel ini mengambungkan isinya dengan isi dari files yang ditentukan, `strcat(file,"/");`, menambahkan /, `strcat(file,dir->d_name);`, dan terakhir mengabungkannya dengan filenya akan dipindahkan.
+- `char current[PATH_MAX];`, variabel ini berguna untuk menunjuk folder mana yang filenya akan dipindahkan. `strcpy(current, cwd);`, variabel ini akan mengcopy isi dari variabel cwd, `strcat(current, files[i + 1]);`, lalu variabel ini mengambungkan isinya dengan isi dari files yang ditentukan.
+- `char file[PATH_MAX];`, variabel ini berguna untuk menunjuk file mana yang akan dipindahkan. `strcpy(file, current);`, variabel ini akan mengcopy isi dari variabel cwd, `strcat(file,"/");`, menambahkan /, `strcat(file,dir->d_name);`, dan terakhir mengabungkannya dengan filenya akan dipindahkan.
 - `char dest[PATH_MAX];`, variabel ini berguna untuk menunjukan kemana file tersebut akan dipindahkan. `strcpy(dest, cwd);`, variabel ini akan mengcopy isi dari variabel cwd, `strcat(dest, files[i]);`, lalu variabel ini mengambungkan isinya dengan isi dari files yang ditentukan.
 - `if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0)`, berguna apabila ditemukan file `.` dan `..`, maka file tersebut tidak akan dipindahkan.
 - `char *argv[]`, variabel ini berguna sebagai perintah saat fungsi `exec` menjalankan program baru.
@@ -262,6 +265,9 @@ void remove_file(pid_t child_id){
 - `child_id = fork();`, berguna untuk mengatur ulang nilai child_id agar bisa digunakan untuk proses selanjutnya.
 
 ### Kesulitan
+- Pada soal 1.D, kesuliatan dalam memindahkan file sebelum menyetahui fungsi dari library dirent.h.
+- Pada soal 1.D, tidak menyetahui sepenuhnya file apa saja yang dicari pada fungsi dari library dirent.h, sehingga mengakibatkan 2 file yang dipindahkan jadi invalid encoding file.
+- Pada soal 1.D, kesalahan penulisan pada *argv yang mengakibatkan tercipta file dan folder invalid encoding.
 
 # Soal 2
 ## Info
