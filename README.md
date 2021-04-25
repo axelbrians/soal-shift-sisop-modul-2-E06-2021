@@ -161,7 +161,6 @@ void move_file(pid_t child_id){
 
 	DIR *d;
 	struct dirent *dir;
-	char file[PATH_MAX];
 	char current[PATH_MAX];
 	char dest[PATH_MAX];
 	for(int i = 0; i < 6; i += 2){
@@ -173,6 +172,7 @@ void move_file(pid_t child_id){
 		while ((dir = readdir (d))) {
 			if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0){
 				if (child_id == 0){
+					char file[PATH_MAX];
 					strcpy(file, current);
 					strcat(file,"/");
 					strcat(file,dir->d_name);
