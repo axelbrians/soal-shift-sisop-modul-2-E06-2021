@@ -269,6 +269,9 @@ void remove_file(pid_t child_id){
 - Pada soal 1.D, tidak menyetahui sepenuhnya file apa saja yang dicari pada fungsi dari library dirent.h, sehingga mengakibatkan 2 file yang dipindahkan jadi invalid encoding file.
 - Pada soal 1.D, kesalahan penulisan pada *argv yang mengakibatkan tercipta file dan folder invalid encoding.
 
+### Output
+https://user-images.githubusercontent.com/79897417/115990016-4779e300-a5eb-11eb-8549-37b339340416.mp4
+
 # Soal 2
 ## Info
 * Dikerjakan oleh 05111940000137 - Axel Briano Suherik.
