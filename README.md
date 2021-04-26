@@ -502,3 +502,4 @@ fclose(statusFile);
 - Pada soal 2.B, saat mengunduh sebuah gambar dari suatu url, lalu menyimpan dengan ukuran sesuai dengan epoch time dan berbentuk persegi, lalu disimpan lagi dengan nama timestamp ketika mendownload.
 
 ### Output
+![ss](https://user-images.githubusercontent.com/72863287/116086198-c04f6c80-a6c9-11eb-909b-c043967469f4.jpg)
